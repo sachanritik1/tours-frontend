@@ -1,24 +1,49 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import Loading from "./Loading";
+import Tours from "./Tours";
+
+const url = "https://tours-react-express.herokuapp.com/";
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [tours, setTours] = useState([]);
+
+  const removeTour = (id) => {
+    const newTours = tours.filter((tour) => tour.id !== id);
+    setTours(newTours);
+  };
+
+  const fetchTours = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(url);
+      const tours = await res.json();
+      setIsLoading(false);
+      setTours(tours);
+    } catch (err) {
+      setIsLoading(false);
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchTours();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <main>
+        <Loading />
+      </main>
+    );
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <main>
+      <Tours tours={tours} removeTour={removeTour} />
+      <button className="btn" onClick={() => setTours([])}>
+        Clear All
+      </button>
+    </main>
   );
 }
 
